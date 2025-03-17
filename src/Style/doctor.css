@@ -1,0 +1,40 @@
+.doctor-container {
+    padding: 20px;
+    background: #f9f9f9;
+    min-height: 100vh;
+  }
+  
+  .doctor-title {
+    text-align: center;
+    color: #333;
+  }
+  
+  .search-input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  .doctor-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+  }
+  
+  .doctor-table th, .doctor-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .doctor-table th {
+    background: #007bff;
+    color: white;
+  }
+  
+  .doctor-table tr:nth-child(even) {
+    background: #f2f2f2;
+  }
+  

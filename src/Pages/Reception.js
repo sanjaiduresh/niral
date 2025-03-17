@@ -3,16 +3,29 @@ import "../Style/reception.css";
 
 const Reception = () => {
   const [queue, setQueue] = useState([]);
-  const [records, setRecords] = useState([]);
+  const [records, setRecords] = useState([
+    { id: 1, name: "Alice Johnson", age: 30, contact: "9876543210", ailment: "Flu" },
+    { id: 2, name: "Bob Williams", age: 45, contact: "9876543211", ailment: "Fractured Arm" },
+    { id: 3, name: "Charlie Davis", age: 29, contact: "9876543212", ailment: "Migraine" }   
+  ]);
   const [newPatient, setNewPatient] = useState({ name: "", severity: "", arrival_time: "", priority: "Low" });
+  const [searchTerm, setSearchTerm] = useState("");
+  const filteredRecords = records.filter((patient) =>
+    patient.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.ailment.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    patient.contact.includes(searchTerm) ||
+    patient.age.toString().includes(searchTerm)
+  );
+
 
   // Simulated API Fetch
   useEffect(() => {
     const fetchQueue = async () => {
       // Simulated API response
       const data = [
-        { id: 1, name: "John Doe", severity: 3, arrival_time: "10:30 AM", priority: "High" },
-        { id: 2, name: "Jane Smith", severity: 2, arrival_time: "10:45 AM", priority: "Medium" },
+        { id: 1, name: "John Doe", severity: 3, arrival_time: "10:30 AM", priority: "High", predicted_wait_time: "15 min" },
+        { id: 2, name: "Jane Smith", severity: 2, arrival_time: "10:45 AM", priority: "Medium", predicted_wait_time: "20 min" },
+        { id: 3, name: "Michael Brown", severity: 5, arrival_time: "11:00 AM", priority: "High", predicted_wait_time: "10 min" }
       ];
       setQueue(data);
     };
@@ -89,6 +102,14 @@ const Reception = () => {
         <input type="text" name="ailment" placeholder="Ailment / Condition" value={newPatient.ailment} onChange={handleChange} required />
         <button type="submit" className="add-btn">Add Patient</button>
       </form>
+      <h3 className="section-title">Search Patient</h3>
+      <input
+        type="text"
+        placeholder="Search by Name, Age, Contact, or Ailment..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+        className="search-input"
+      />
 
       {/* Patient Records */}
       <h3 className="section-title">Patient Records</h3>
@@ -102,8 +123,8 @@ const Reception = () => {
           </tr>
         </thead>
         <tbody>
-          {records.map((patient, index) => (
-            <tr key={index}>
+          {filteredRecords.map((patient) => (
+            <tr key={patient.id}>
               <td>{patient.name}</td>
               <td>{patient.age}</td>
               <td>{patient.contact}</td>
@@ -112,6 +133,7 @@ const Reception = () => {
           ))}
         </tbody>
       </table>
+      <h3 className="section-title">Patient Queue</h3>
 
       {/* Add New Patient Form */}
       <form className="patient-form" onSubmit={addPatient}>

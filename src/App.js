@@ -27,7 +27,7 @@ function App() {
     <div className="app-container">
       {/* Sidebar Navigation */}
       <div className="sidebar">
-        <h2 className="sidebar-title">Patient link Dashboard</h2>
+        <h2 className="sidebar-title">PatientLink SmartCare</h2>
         <button onClick={() => setSelectedComponent("Reception")} className={`sidebar-btn ${selectedComponent === "Reception" ? "active" : ""}`}>
           Reception
         </button>

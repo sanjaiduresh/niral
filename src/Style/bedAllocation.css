@@ -1,0 +1,65 @@
+.container {
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+    text-align: center;
+}
+
+h2 {
+    margin-bottom: 20px;
+}
+
+.bed-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+.bed {
+    padding: 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-align: center;
+    font-weight: bold;
+    transition: 0.3s;
+}
+
+.bed.available {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.bed.occupied {
+    background-color: #FF5733;
+    color: white;
+}
+
+.bed.reserved {
+    background-color: #FFC107;
+    color: black;
+}
+
+.bed:hover {
+    opacity: 0.8;
+}
+
+.form-container {
+    margin-top: 20px;
+}
+
+input {
+    padding: 8px;
+    margin-right: 10px;
+}
+
+button {
+    padding: 8px 15px;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}

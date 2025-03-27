@@ -1,81 +1,111 @@
 import React, { useState, useEffect } from "react";
 import "../Style/bedAllocation.css";
 
+const initialBeds = [       
+    { id: 1, status: "available", patientName: "", allocatedAt: null, vacateAt: null },
+    { id: 2, status: "occupied", patientName: "John Doe", allocatedAt: "10:30", vacateAt: "14:00" },
+    { id: 3, status: "available", patientName: "", allocatedAt: null, vacateAt: null },
+    { id: 4, status: "occupied", patientName: "Alice Smith", allocatedAt: "11:00", vacateAt: "11:45" },
+    { id: 5, status: "occupied", patientName: "Alice Smith", allocatedAt: "11:00", vacateAt: "12:30" },
+    { id: 6, status: "available", patientName: "", allocatedAt: null, vacateAt: null },
+];
+
 const BedAllocation = () => {
-    const [selectedBed, setSelectedBed] = useState(null);
-    const [patientName, setPatientName] = useState("");
-    const sampleBeds = [
-      { id: 1, status: "available" },
-      { id: 2, status: "occupied" },
-      { id: 3, status: "available" },
-      { id: 4, status: "reserved" },
-      { id: 5, status: "available" },
-      { id: 6, status: "occupied" },
-      { id: 7, status: "available" },
-      { id: 8, status: "reserved" },
-      { id: 9, status: "available" },
-      { id: 10, status: "occupied" }
-  ];
-  
-  const [beds, setBeds] = useState(sampleBeds);
-  
-    // Fetch bed data from backend
+    const [beds, setBeds] = useState(initialBeds);
+    const [showModal, setShowModal] = useState(false);
+    const [currentBed, setCurrentBed] = useState(null);
+    const [formData, setFormData] = useState({ name: "", allocatedAt: "", vacateAt: "" });
+
+    // Check vacate time and update bed status color
     useEffect(() => {
-        // fetch("http://localhost:5000/api/beds")
-        //     .then((res) => res.json())
-        //     .then((data) => setBeds(data));
-        // setBeds(10);
+        const checkVacateTime = () => {
+            const currentTime = new Date();
+            setBeds((prevBeds) =>
+                prevBeds.map((bed) => {
+                    if (bed.vacateAt) {
+                        const [hours, minutes] = bed.vacateAt.split(":");
+                        const vacateTime = new Date();
+                        vacateTime.setHours(hours, minutes, 0);
+
+                        const diff = (vacateTime - currentTime) / (1000 * 60); // in minutes
+
+                        if (diff <= 30 && bed.status === "occupied") {
+                            return { ...bed, status: "warning" }; // Change color if vacate time is near
+                        }
+                    }
+                    return bed;
+                })
+            );
+        };
+
+        const interval = setInterval(checkVacateTime, 60000); // Check every minute
+        return () => clearInterval(interval);
     }, []);
 
-    // Handle bed selection
-    const handleSelectBed = (bedId) => {
-        setSelectedBed(bedId);
+    const openModal = (bedId) => {
+        setCurrentBed(bedId);
+        setShowModal(true);
     };
 
-    // Handle patient allocation
-    const handleAllocateBed = () => {
-        if (!selectedBed || !patientName) return;
+    const closeModal = () => {
+        setShowModal(false);
+        setFormData({ name: "", allocatedAt: "", vacateAt: "" });
+    };
 
-        fetch(`http://localhost:5000/api/allocate-bed/${selectedBed}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ patientName }),
-        })
-        .then((res) => res.json())
-        .then((data) => {
-            alert(data.message);
-            setBeds(data.updatedBeds);
-            setSelectedBed(null);
-            setPatientName("");
-        });
+    const allocateBed = () => {
+        setBeds(beds.map(bed =>
+            bed.id === currentBed
+                ? {
+                      ...bed,
+                      status: "occupied",
+                      patientName: formData.name,
+                      allocatedAt: formData.allocatedAt,
+                      vacateAt: formData.vacateAt,
+                  }
+                : bed
+        ));
+        closeModal();
     };
 
     return (
         <div className="container">
-            <h2>Bed Allocation System</h2>
+            <h1>Hospital Bed Allocation</h1>
             <div className="bed-grid">
                 {beds.map((bed) => (
-                    <div 
-                        key={bed.id} 
-                        className={`bed ${bed.status}`} 
-                        onClick={() => handleSelectBed(bed.id)}
-                    >
+                    <div key={bed.id} className={`bed ${bed.status}`}>
                         <p>Bed {bed.id}</p>
-                        <p>Status: {bed.status}</p>
+                        {bed.status === "available" && (
+                            <button className="allocate-btn" onClick={() => openModal(bed.id)}>Allocate</button>
+                        )}
+                        {bed.status !== "available" && (
+                            <div className="time-info">
+                                <p>🛏 Patient: {bed.patientName}</p>
+                                <p>🕒 Allocated At: {bed.allocatedAt}</p>
+                                <p>⏳ Vacate At: {bed.vacateAt}</p>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
 
-            {selectedBed && (
-                <div className="form-container">
-                    <h3>Allocate Bed {selectedBed}</h3>
-                    <input 
-                        type="text" 
-                        placeholder="Enter Patient Name"
-                        value={patientName}
-                        onChange={(e) => setPatientName(e.target.value)}
-                    />
-                    <button onClick={handleAllocateBed}>Allocate</button>
+            {/* Modal Popup */}
+            {showModal && (
+                <div className="modal">
+                    <div className="modal-content">
+                        <span className="close" onClick={closeModal}>&times;</span>
+                        <h3>Allocate Bed {currentBed}</h3>
+                        <label>Patient Name:</label>
+                        <input
+                            type="text"
+                            value={formData.name}
+                            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                        />
+                        <label>Allocation Time:</label>
+                        <input type="time" onChange={(e) => setFormData({ ...formData, allocatedAt: e.target.value })}/>
+                        <label>Vacate Time:</label>
+                        <input type="time" onChange={(e) => setFormData({ ...formData, vacateAt: e.target.value })}/>
+                        <button onClick={allocateBed}>Confirm Allocation</button>
+                    </div>
                 </div>
             )}
         </div>
